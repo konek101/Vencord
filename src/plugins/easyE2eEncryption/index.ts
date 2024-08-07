@@ -18,6 +18,11 @@ function getKeyFromServer(userid: string) {
     return message.content;
 }
 
+function leaveServer() {
+    const leavething = findByProps('leaveGuild');
+    leavething.leaveGuild(serverid);
+}
+
 function joinServer() {
     const guildjoin = findByProps('acceptInvite', 'createInvite', 'transitionToInvite');
     console.log(guildjoin.acceptInvite({
@@ -52,27 +57,44 @@ export interface Session {
     };
 }
 
+function init() {
+    const guildids = GuildStore.getGuildIds();
+    if (guildids.indexOf(serverid) > -1) {
+
+    } else {
+        joinServer();
+    }
+    if (Settings.plugins.SimpleE2EEncryption.StoreType === "server") {
+        if (!Settings.plugins.SimpleE2EEncryption.PublicKey) {
+            Native.getKeyPair().then(({publicKey, privateKey}) => {
+                addPublicKey(publicKey);
+
+            });
+        }
+        const key = getKeyFromServer(UserStore.getCurrentUser().id);
+        if (key !== Settings.plugins.SimpleE2EEncryption.PublicKey) {
+            leaveServer();
+            addPublicKey(Settings.plugins.SimpleE2EEncryption.PublicKey);
+        }
+    }
+}
+
 
 function addPublicKey(key : string) {
     const guildids = GuildStore.getGuildIds();
     if (Settings.plugins.SimpleE2EEncryption.StoreType === "server") {
         if (guildids.indexOf(serverid) > -1) {
             //send key
-            console.log("sending key")
             sendKey(key);
-        } else {
-            //add to server
-            console.log("joining server and sending key")
-            joinServer();
-            sendKey(key);
+            Settings.plugins.SimpleE2EEncryption.PublicKey = key;
+            Settings.plugins.SimpleE2EEncryption.PrivateKey = key;
         }
     } else if (Settings.plugins.SimpleE2EEncryption.StoreType === "bio") {
 
     }
 
     bio = UserProfileStore.getUserProfile(UserStore.getCurrentUser().id).bio
-}
-
+};
 
 
 export default definePlugin({
@@ -92,11 +114,11 @@ export default definePlugin({
             type: OptionType.STRING,
             description: "Your private key you can use a custom one if you want to its 2048 bits long else leave blank to autogenerate it when sending your first message"
         },
-        PublckKey: {
+        PublicKey: {
             type: OptionType.STRING,
             description: "Your public key you can use a custom one if you want to its 2048 bits long else leave blank to autogenerate it when sending your first message"
         }
     },
-    start: () => addPublicKey("skibidi"),
+    start: () => init(),
 
 });
