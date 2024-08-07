@@ -1,27 +1,32 @@
 import { IpcMainInvokeEvent } from 'electron';
 import NodeRSA from 'node-rsa';
 
-const nodeRSA = new NodeRSA();
+
 
 export function getKeyPair() {
+    const nodeRSA = new NodeRSA();
     nodeRSA.generateKeyPair(2048);
-    const keypair = nodeRSA.generateKeyPair(2048);
-    console.log(keypair.exportKey);
-
+    const publicKey = nodeRSA.exportKey('pkcs1-public-pem');
+    const privateKey = nodeRSA.exportKey('pkcs1-private-pem');
     return {
-        //publicKey,
-        //privateKey
-    }
+        publicKey,
+        privateKey
+    };
 }
 
-export function encryptText(_: IpcMainInvokeEvent, plaintext: String ,publickkey) {
-    //let encrypted = nodeRSA.encryptStringWithRsaPublicKey({plaintext, publickkey});
+export function encryptText(_: IpcMainInvokeEvent, plaintext: string , publickkey: string) {
+    const nodeRSA = new NodeRSA();
+    nodeRSA.importKey(publickkey, 'pkcs1-public-pem');
+    const encrypted = nodeRSA.encrypt(plaintext, 'base64');
 
-    //return encrypted;
+    return encrypted;
 
 }
-export function decryptCypher(_: IpcMainInvokeEvent, ciphertext: String, privateKey) {
-    //let plaintext = nodeRSA.decryptStringWithRsaPrivateKey({ciphertext, privateKey});
+export function decryptCypher(_: IpcMainInvokeEvent, ciphertext: string, privateKey: string) {
+    const nodeRSA = new NodeRSA();
+    nodeRSA.importKey(privateKey, 'pkcs1-private-pem');
 
-    //return plaintext;
+    const plaintext = nodeRSA.decrypt(ciphertext, 'utf16le');
+
+    return plaintext;
 }
