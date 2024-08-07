@@ -42,6 +42,7 @@
         "gifenc": "github:mattdesl/gifenc#64842fca317b112a8590f8fef2bf3825da8f6fe3",
         "monaco-editor": "^0.50.0",
         "nanoid": "^5.0.7",
+        "node-rsa": "^1.1.1",
         "virtual-merge": "^1.0.1"
     },
     "devDependencies": {
@@ -50,6 +51,7 @@
         "@types/diff": "^5.2.1",
         "@types/lodash": "^4.17.7",
         "@types/node": "^22.0.3",
+        "@types/node-rsa": "^1.1.4",
         "@types/react": "^18.3.3",
         "@types/react-dom": "^18.3.0",
         "@types/yazl": "^2.4.5",
